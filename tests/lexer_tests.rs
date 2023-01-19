@@ -44,7 +44,12 @@ mod tests {
             },
         ];
 
-        let lexer = Lexer::new(input);
+        let mut lexer = Lexer::new(input);
 
+        for item in hope_test_val {
+            let tok = lexer.next_token();
+            assert_eq!(tok.r#type, item.r#type);
+            assert_eq!(tok.literal, item.literal);
+        }
     }
 }
