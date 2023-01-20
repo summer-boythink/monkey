@@ -1,25 +1,11 @@
 use crate::{Token, TokenType};
 
-// #[derive(Copy, Clone)]
 pub struct Lexer {
     input: String,
     position: i32,
     read_position: i32,
     ch: Option<char>, //current char
 }
-
-// impl Clone for Lexer {
-//
-//     fn clone(&self) -> Self {
-//         let s = *self;
-//         Lexer {
-//             input: s.input,
-//             position:s.position,
-//             read_position:s.read_position,
-//             ch:s.ch
-//         }
-//     }
-// }
 
 impl Lexer {
     pub fn new(input: String) -> Lexer {
@@ -42,6 +28,7 @@ impl Lexer {
             for c in char_indices {
                 if c.0 == self.read_position as usize {
                     self.ch = Option::from(c.1);
+                    break;
                 }
             }
         }
@@ -50,8 +37,46 @@ impl Lexer {
         self
     }
 
+    pub fn skip_white_space(&mut self) {
+        if self.ch != None {
+            let mut ch = self.ch.unwrap();
+            while ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
+                self.read_char();
+                ch = self.ch.unwrap();
+            }
+        }
+    }
+
+    pub fn is_letter(&self) -> bool {
+        let ch = self.ch.unwrap();
+        'a' < ch && ch <= 'z' || 'A' < ch && ch <= 'Z' || ch == '_'
+    }
+
+    pub fn is_digit(&self) -> bool {
+        let ch = self.ch.unwrap();
+        '0' <= ch && ch <= '9'
+    }
+
+    pub fn read_identifier(&mut self) -> String {
+        let prev_position = self.position;
+        while self.is_letter() {
+            self.read_char();
+        }
+        //TODO:better slice ?
+        String::from(&self.input[prev_position as usize..(self.position) as usize])
+    }
+
+    pub fn read_number(&mut self) -> String {
+        let prev_position = self.position;
+        while self.is_digit() {
+            self.read_char();
+        }
+        String::from(&self.input[prev_position as usize..(self.position) as usize])
+    }
+
     pub fn next_token(&mut self) -> Token {
         let tok: Token;
+        self.skip_white_space();
         match self.ch {
             Some('=') => tok = Token::new(TokenType::ASSIGN, self.ch.unwrap().to_string()),
             Some(';') => tok = Token::new(TokenType::SEMICOLON, self.ch.unwrap().to_string()),
@@ -65,7 +90,18 @@ impl Lexer {
                 tok = Token::new(TokenType::EOF, "".to_string());
             }
             _ => {
-                todo!()
+                if self.is_letter() {
+                    let val = self.read_identifier();
+                    tok = Token::new(Token::look_up_ident(val.clone()), val);
+                    //TODO why i can't remove `return` ?
+                    return tok;
+                } else if self.is_digit() {
+                    let val = self.read_number();
+                    tok = Token::new(TokenType::INT, val);
+                    return tok;
+                } else {
+                    tok = Token::new(TokenType::ILLEGAL, self.ch.unwrap().to_string());
+                }
             }
         }
         self.read_char();

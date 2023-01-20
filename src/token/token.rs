@@ -1,4 +1,5 @@
-// type TokenType = i32;
+use crate::token::keywords::KeyWord;
+use crate::TokenType::IDENT;
 
 #[derive(Eq, PartialEq, Debug)]
 pub enum TokenType {
@@ -42,5 +43,14 @@ impl Token {
             r#type: token_type,
             literal,
         }
+    }
+
+    pub fn look_up_ident(ident: String) -> TokenType {
+        for v in KeyWord::new().key_word {
+            if v.0 == ident {
+                return v.1;
+            }
+        }
+        IDENT
     }
 }
