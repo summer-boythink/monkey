@@ -1,5 +1,6 @@
-// use monkey::Token;
+use monkey::repl::start;
 
 fn main() {
-    println!("Hello, world!");
+    println!("welcome into Monkey repl!");
+    start();
 }

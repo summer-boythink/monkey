@@ -59,14 +59,18 @@ impl Lexer {
             let mut ch = self.ch.unwrap();
             while ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
                 self.read_char();
-                ch = self.ch.unwrap();
+                if self.ch != None {
+                    ch = self.ch.unwrap();
+                } else {
+                    break;
+                }
             }
         }
     }
 
     pub fn is_letter(&self) -> bool {
         let ch = self.ch.unwrap();
-        'a' < ch && ch <= 'z' || 'A' < ch && ch <= 'Z' || ch == '_'
+        'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
     }
 
     pub fn is_digit(&self) -> bool {

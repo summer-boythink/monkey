@@ -4,7 +4,7 @@ mod tests {
 
     #[test]
     fn test_next_token_simple() {
-        let input = "=+(){},;!".to_string();
+        let input = "=+ \n(){},;! ".to_string();
         let hope_test_val = vec![
             Token {
                 r#type: TokenType::ASSIGN,

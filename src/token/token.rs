@@ -32,6 +32,7 @@ pub enum TokenType {
     RETURN,
 }
 
+#[derive(Eq, PartialEq, Debug)]
 pub struct Token {
     pub r#type: TokenType,
     pub literal: String,
