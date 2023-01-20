@@ -7,6 +7,7 @@ authors = ["summer-boythink"]
 repository = "https://github.com/summer-boythink/monkey"
 keywords = ["Interpreter"]
 rust-version = "1.66"
+description = "Rust implementation of monkey language"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
