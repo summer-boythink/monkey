@@ -4,7 +4,7 @@ mod tests {
 
     #[test]
     fn test_next_token_simple() {
-        let input = "=+(){},;".to_string();
+        let input = "=+(){},;!".to_string();
         let hope_test_val = vec![
             Token {
                 r#type: TokenType::ASSIGN,
@@ -39,6 +39,10 @@ mod tests {
                 literal: ";".to_string(),
             },
             Token {
+                r#type: TokenType::BANG,
+                literal: "!".to_string(),
+            },
+            Token {
                 r#type: TokenType::EOF,
                 literal: "".to_string(),
             },
@@ -59,8 +63,10 @@ mod tests {
         let ten = 10;\
         fn(x,y) {\
         x+y;\
-        };"
-        .to_string();
+        };\
+        10 != 9;\
+        return true;"
+            .to_string();
         let hope_test_val = vec![
             Token {
                 r#type: TokenType::LET,
@@ -149,6 +155,34 @@ mod tests {
             Token {
                 r#type: TokenType::RBRACE,
                 literal: "}".to_string(),
+            },
+            Token {
+                r#type: TokenType::SEMICOLON,
+                literal: ";".to_string(),
+            },
+            Token {
+                r#type: TokenType::INT,
+                literal: "10".to_string(),
+            },
+            Token {
+                r#type: TokenType::NotEq,
+                literal: "!=".to_string(),
+            },
+            Token {
+                r#type: TokenType::INT,
+                literal: "9".to_string(),
+            },
+            Token {
+                r#type: TokenType::SEMICOLON,
+                literal: ";".to_string(),
+            },
+            Token {
+                r#type: TokenType::RETURN,
+                literal: "return".to_string(),
+            },
+            Token {
+                r#type: TokenType::TRUE,
+                literal: "true".to_string(),
             },
             Token {
                 r#type: TokenType::SEMICOLON,

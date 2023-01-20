@@ -18,6 +18,11 @@ impl KeyWord {
             key_word: HashMap::from([
                 ("fn".to_string(), TokenType::FUNCTION),
                 ("let".to_string(), TokenType::LET),
+                ("true".to_string(), TokenType::TRUE),
+                ("false".to_string(), TokenType::FALSE),
+                ("if".to_string(), TokenType::IF),
+                ("else".to_string(), TokenType::ELSE),
+                ("return".to_string(), TokenType::RETURN),
             ]),
         }
     }

@@ -37,6 +37,23 @@ impl Lexer {
         self
     }
 
+    // peek forward char
+    pub fn peek_char(&mut self) -> Option<char> {
+        if self.read_position >= self.input.len() as i32 {
+            None
+        } else {
+            //TODO:better index char
+            let char_indices = self.input.char_indices();
+            let mut res = None;
+            for c in char_indices {
+                if c.0 == self.read_position as usize {
+                    res = Some(c.1);
+                }
+            }
+            res
+        }
+    }
+
     pub fn skip_white_space(&mut self) {
         if self.ch != None {
             let mut ch = self.ch.unwrap();
@@ -78,7 +95,30 @@ impl Lexer {
         let tok: Token;
         self.skip_white_space();
         match self.ch {
-            Some('=') => tok = Token::new(TokenType::ASSIGN, self.ch.unwrap().to_string()),
+            Some('<') => tok = Token::new(TokenType::LT, self.ch.unwrap().to_string()),
+            Some('>') => tok = Token::new(TokenType::GT, self.ch.unwrap().to_string()),
+            Some('*') => tok = Token::new(TokenType::ASTERISK, self.ch.unwrap().to_string()),
+            Some('/') => tok = Token::new(TokenType::SLASH, self.ch.unwrap().to_string()),
+            Some('!') => {
+                if self.peek_char() == Some('=') {
+                    let ch = self.ch.clone();
+                    self.read_char();
+                    let literal: String = format!("{}{}", ch.unwrap(), self.ch.unwrap());
+                    tok = Token::new(TokenType::NotEq, literal);
+                } else {
+                    tok = Token::new(TokenType::BANG, self.ch.unwrap().to_string())
+                }
+            }
+            Some('=') => {
+                if self.peek_char() == Some('=') {
+                    let ch = self.ch.clone();
+                    self.read_char();
+                    let literal: String = format!("{}{}", ch.unwrap(), self.ch.unwrap());
+                    tok = Token::new(TokenType::EQ, literal);
+                } else {
+                    tok = Token::new(TokenType::ASSIGN, self.ch.unwrap().to_string())
+                }
+            }
             Some(';') => tok = Token::new(TokenType::SEMICOLON, self.ch.unwrap().to_string()),
             Some('(') => tok = Token::new(TokenType::LPAREN, self.ch.unwrap().to_string()),
             Some(')') => tok = Token::new(TokenType::RPAREN, self.ch.unwrap().to_string()),
