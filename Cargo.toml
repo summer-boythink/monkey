@@ -2,6 +2,11 @@
 name = "monkey"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+authors = ["summer-boythink"]
+repository = "https://github.com/summer-boythink/monkey"
+keywords = ["Interpreter"]
+rust-version = "1.66"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

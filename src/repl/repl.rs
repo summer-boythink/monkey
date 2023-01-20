@@ -6,6 +6,9 @@ use std::io::Write;
 const PROMPT: &str = ">>";
 
 pub fn start() {
+    // This is primarily used for Windows 10 environments
+    // which will not correctly colorize the outputs based on ANSI escape codes.
+    colored::control::set_virtual_terminal(true).unwrap();
     loop {
         print!("{} ", PROMPT.italic().green());
         io::stdout().flush().unwrap();
