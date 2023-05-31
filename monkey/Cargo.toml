@@ -1,0 +1,25 @@
+[package]
+name = "monkey"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["summer-boythink"]
+repository = "https://github.com/summer-boythink/monkey"
+keywords = ["Interpreter"]
+rust-version = "1.66"
+description = "Rust implementation of monkey language"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "monkey"
+path = "src/bin/main.rs"
+
+[lib]
+name = "monkey"
+path = "src/lib.rs"
+
+
+[dependencies]
+colored = "2.0.0"
+monkey-macros = {path = "../monkey-macros", version = "0.1.0"}
