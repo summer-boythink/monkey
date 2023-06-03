@@ -1,3 +1,3 @@
-## Monkey
+## monkey
 
-Rust implementation of monkey language, reference from https://interpreterbook.com
+Implementation of the monkey language, under development

@@ -1,7 +1,7 @@
 use crate::{Expression, Identifier, Token};
 
 pub struct LetStatement {
-    token: Token,
-    name: *mut Identifier,
-    value: dyn Expression,
+    pub token: Token,
+    pub name: *mut Identifier,
+    pub value: dyn Expression,
 }

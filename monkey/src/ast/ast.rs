@@ -1,6 +1,6 @@
 use monkey_macros::DefaultExpressionNode;
 
-use crate::Token;
+use crate::{Token};
 
 pub trait Node {
     fn token_literal(&self) -> String;
@@ -30,14 +30,7 @@ impl Program {
 
 #[derive(DefaultExpressionNode)]
 pub struct Identifier {
-    token: Token,
-    value: String,
+    pub token: Token,
+    pub value: String,
 }
 
-impl Identifier {
-    pub fn express_node(&self) {}
-
-    pub fn token_literal(&self) -> String {
-        self.token.literal.to_string()
-    }
-}
