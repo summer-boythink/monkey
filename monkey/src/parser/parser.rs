@@ -1,4 +1,4 @@
-use crate::{Lexer, Token, ast};
+use crate::{ast, Lexer, Token};
 
 pub struct Parser {
     lexer: *mut Lexer,
@@ -7,8 +7,8 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn new(l: &mut Lexer) -> *mut Parser {
-        &mut Parser {
+    pub fn new(l: &mut Lexer) -> Parser {
+        Parser {
             lexer: l,
             cur_token: None,
             peek_token: None,
@@ -22,7 +22,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_program(&mut self) -> ast::Program {
+    pub fn parse_program(&mut self) -> Option<ast::Program> {
         todo!()
     }
 }

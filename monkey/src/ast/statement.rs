@@ -1,5 +1,4 @@
 use monkey_macros::DefaultStatementNode;
-
 use crate::{Expression, Identifier, Token};
 
 #[derive(DefaultStatementNode)]
