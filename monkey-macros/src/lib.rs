@@ -15,13 +15,21 @@ pub fn expression_node(input: TokenStream) -> TokenStream {
     quote!();
 
     quote! {
-    impl #id {
-            pub fn expression_node(&self) {}
-
-            pub fn token_literal(&self) -> String {
+        impl Node for #id {
+            fn token_literal(&self) -> String {
                 self.token.literal.to_string()
             }
         }
+
+
+    impl Expression for #id {
+        fn expression_node(&self) {
+        }
+
+        fn as_any(&self) -> &dyn std::any::Any {
+            todo!()
+        }
+    }
     }
     .into()
 }
@@ -36,13 +44,21 @@ pub fn statement_node(input: TokenStream) -> TokenStream {
     quote!();
 
     quote! {
-    impl #id {
-            pub fn statement_node(&self) {}
-
-            pub fn token_literal(&self) -> String {
+    impl Node for #id {
+            fn token_literal(&self) -> String {
                 self.token.literal.to_string()
             }
         }
+
+
+    impl Statement for #id {
+        fn statement_node(&self) {
+        }
+
+        fn as_any(&self) -> &dyn std::any::Any {
+            todo!()
+        }
+    }
     }
     .into()
 }

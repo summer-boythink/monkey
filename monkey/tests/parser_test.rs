@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use monkey::{parser::parser::Parser, Lexer, Statement, LetStatement};
+
+    use monkey::{parser::parser::Parser, LetStatement, Lexer, Node, Statement};
 
     #[test]
     fn test_let_statements() {
@@ -16,7 +17,7 @@ mod tests {
         if let Some(prog) = program {
             let statelen = prog.statements.len();
             if statelen != 3 {
-                eprintln!("hope 3 statements ,get {}", statelen)
+                panic!("hope 3 statements ,get {}", statelen)
             }
 
             let tests = vec!["x", "y", "foo"];
@@ -25,19 +26,19 @@ mod tests {
                 assert!(test_let_statement(stmt, test.to_string()));
             }
         } else {
-            eprintln!("parse_program None");
+            panic!("parse_program None");
         }
     }
 
-    fn test_let_statement<S>(s:&Box<S>, name: String) -> bool
-        where
-        S:Statement+ ?Sized
-     {
+    fn test_let_statement<S>(s: &Box<S>, name: String) -> bool
+    where
+        S: Statement + ?Sized,
+    {
         if s.token_literal() != "let" {
             eprintln!("s.TokenLiteral not 'let'. got={}", s.token_literal());
             return false;
         }
-    
+
         let let_stmt = match s.as_any().downcast_ref::<LetStatement>() {
             Some(stmt) => stmt,
             None => {
@@ -47,23 +48,26 @@ mod tests {
         };
 
         unsafe {
-            if (*let_stmt.name).value != name {
-                eprintln!(
-                    "letStmt.Name.Value not '{}'. got={}",
-                    name, (*let_stmt.name).value
-                );
-                return false;
+            if let Some(ident) = let_stmt.name.as_ref().map(|ident|  &mut **ident ) {
+                if ident.value != name {
+                    eprintln!(
+                        "letStmt.Name.Value not '{}'. got={}",
+                        name,
+                        ident.value
+                    );
+                    return false;
+                }
+            
+                if ident.token_literal() != name {
+                    eprintln!(
+                        "letStmt.Name.TokenLiteral() not '{}'. got={}",
+                        name,
+                        ident.token_literal()
+                    );
+                    return false;
+                }
             }
-        
-            if (*let_stmt.name).token_literal() != name {
-                eprintln!(
-                    "letStmt.Name.TokenLiteral() not '{}'. got={}",
-                    name,
-                    (*let_stmt.name).token_literal()
-                );
-                return false;
-            }
-        
+
             true
         }
     }

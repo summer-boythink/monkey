@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use monkey::{Identifier, Token, TokenType};
+    use monkey::{Expression, Identifier, Node, Token, TokenType};
 
     #[test]
     fn test_macros() {

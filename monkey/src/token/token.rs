@@ -1,7 +1,7 @@
 use crate::token::keywords::KeyWord;
 use crate::TokenType::IDENT;
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone, Copy)]
 pub enum TokenType {
     ILLEGAL,
     EOF,
