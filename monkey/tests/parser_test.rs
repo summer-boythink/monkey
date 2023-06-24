@@ -29,7 +29,10 @@ mod tests {
         }
     }
 
-    fn test_let_statement(s: &Box<dyn Statement>, name: String) -> bool {
+    fn test_let_statement<S>(s:&Box<S>, name: String) -> bool
+        where
+        S:Statement+ ?Sized
+     {
         if s.token_literal() != "let" {
             eprintln!("s.TokenLiteral not 'let'. got={}", s.token_literal());
             return false;
@@ -42,24 +45,26 @@ mod tests {
                 return false;
             }
         };
-    
-        if let_stmt.name.value != name {
-            eprintln!(
-                "letStmt.Name.Value not '{}'. got={}",
-                name, let_stmt.name.value
-            );
-            return false;
+
+        unsafe {
+            if (*let_stmt.name).value != name {
+                eprintln!(
+                    "letStmt.Name.Value not '{}'. got={}",
+                    name, (*let_stmt.name).value
+                );
+                return false;
+            }
+        
+            if (*let_stmt.name).token_literal() != name {
+                eprintln!(
+                    "letStmt.Name.TokenLiteral() not '{}'. got={}",
+                    name,
+                    (*let_stmt.name).token_literal()
+                );
+                return false;
+            }
+        
+            true
         }
-    
-        if let_stmt.name.token_literal() != name {
-            eprintln!(
-                "letStmt.Name.TokenLiteral() not '{}'. got={}",
-                name,
-                let_stmt.name.token_literal()
-            );
-            return false;
-        }
-    
-        true
     }
 }
