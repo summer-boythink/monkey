@@ -19,7 +19,7 @@ impl Parser {
     }
 
     pub fn next_token(&mut self) {
-        self.cur_token = self.peek_token.take();
+        self.cur_token = self.peek_token.clone();
         unsafe {
             self.peek_token = Some((*self.lexer).next_token());
         }
@@ -37,7 +37,7 @@ impl Parser {
             self.next_token();
         }
 
-        while let Some(cur_token) = self.cur_token.take() {
+        while let Some(cur_token) = self.cur_token.clone() {
             if cur_token.r#type != TokenType::EOF {
                 if let Some(stmt) = self.parse_statement() {
                     program.statements.push(stmt);
@@ -62,7 +62,7 @@ impl Parser {
 
     fn parse_let_statement(&mut self) -> Option<LetStatement> {
         let mut stmt = LetStatement {
-            token: self.cur_token.take().unwrap(),
+            token: self.cur_token.clone().unwrap(),
             name: None,
             value: None,
         };
@@ -70,15 +70,19 @@ impl Parser {
         if !self.expect_peek(TokenType::IDENT) {
             return None;
         }
-
-        stmt.name = Some(&mut Identifier {
-            token: self.cur_token.take().unwrap(),
-            value: self.cur_token.take().unwrap().literal,
+        let token = self.cur_token.clone().unwrap();
+        stmt.name = Some(Identifier {
+            token: token.clone(),
+            value: token.literal,
         });
 
         if !self.expect_peek(TokenType::ASSIGN) {
             return None;
         }
+
+        // TODO:value赋值
+        // self.next_token();
+        // stmt.value =
 
         // TODO: 跳过对表达式的处理，直到遇见分号
         while !self.cur_token_is(TokenType::SEMICOLON) {

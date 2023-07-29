@@ -27,7 +27,7 @@ pub fn expression_node(input: TokenStream) -> TokenStream {
         }
 
         fn as_any(&self) -> &dyn std::any::Any {
-            todo!()
+            self
         }
     }
     }
@@ -56,7 +56,7 @@ pub fn statement_node(input: TokenStream) -> TokenStream {
         }
 
         fn as_any(&self) -> &dyn std::any::Any {
-            todo!()
+            self
         }
     }
     }

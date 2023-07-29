@@ -38,7 +38,6 @@ mod tests {
             eprintln!("s.TokenLiteral not 'let'. got={}", s.token_literal());
             return false;
         }
-
         let let_stmt = match s.as_any().downcast_ref::<LetStatement>() {
             Some(stmt) => stmt,
             None => {
@@ -47,28 +46,22 @@ mod tests {
             }
         };
 
-        unsafe {
-            if let Some(ident) = let_stmt.name.as_ref().map(|ident|  &mut **ident ) {
-                if ident.value != name {
-                    eprintln!(
-                        "letStmt.Name.Value not '{}'. got={}",
-                        name,
-                        ident.value
-                    );
-                    return false;
-                }
-            
-                if ident.token_literal() != name {
-                    eprintln!(
-                        "letStmt.Name.TokenLiteral() not '{}'. got={}",
-                        name,
-                        ident.token_literal()
-                    );
-                    return false;
-                }
+        if let Some(ident) = let_stmt.name.as_ref().map(|ident| ident) {
+            if ident.value != name {
+                eprintln!("letStmt.Name.Value not '{}'. got={}", name, ident.value);
+                return false;
             }
 
-            true
+            if ident.token_literal() != name {
+                eprintln!(
+                    "letStmt.Name.TokenLiteral() not '{}'. got={}",
+                    name,
+                    ident.token_literal()
+                );
+                return false;
+            }
         }
+
+        true
     }
 }
