@@ -1,4 +1,6 @@
-use crate::{Identifier, LetStatement, Lexer, Program, Statement, Token, TokenType};
+use crate::{
+    Identifier, LetStatement, Lexer, Program, ReturnStatement, Statement, Token, TokenType,
+};
 
 pub struct Parser {
     pub lexer: *mut Lexer,
@@ -62,8 +64,26 @@ impl Parser {
             Some(TokenType::LET) => self
                 .parse_let_statement()
                 .map(|stmt| Box::new(stmt) as Box<dyn Statement>),
+
+            Some(TokenType::RETURN) => self
+                .parse_return_statement()
+                .map(|stmt| Box::new(stmt) as Box<dyn Statement>),
             _ => None,
         }
+    }
+
+    fn parse_return_statement(&mut self) -> Option<ReturnStatement> {
+        let stmt = ReturnStatement {
+            token: self.cur_token.clone().unwrap(),
+            return_value: None,
+        };
+        self.next_token();
+
+        while !self.cur_token_is(TokenType::SEMICOLON) {
+            self.next_token();
+        }
+
+        Some(stmt)
     }
 
     fn parse_let_statement(&mut self) -> Option<LetStatement> {

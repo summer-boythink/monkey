@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
 
-    use monkey::{parser::parser::Parser, LetStatement, Lexer, Node, Statement};
+    use monkey::{parser::parser::Parser, LetStatement, Lexer, Node, ReturnStatement, Statement};
 
     #[test]
     fn test_let_statements() {
@@ -29,6 +29,42 @@ mod tests {
             }
         } else {
             panic!("parse_program None");
+        }
+    }
+
+    #[test]
+    fn test_return_statements() {
+        let input = "return 5;\
+        return 10;\
+        return 993322;"
+            .to_string();
+
+        let mut l = Lexer::new(input);
+        let mut p = Parser::new(&mut l);
+
+        let program = p.parse_program();
+        check_parser_error(p);
+
+        if let Some(prog) = program {
+            assert_eq!(
+                prog.statements.len(),
+                3,
+                "prog.Statements does not contain 3 statements. got={}",
+                prog.statements.len()
+            );
+
+            for stmt in &prog.statements {
+                let return_stmt = stmt
+                    .as_any()
+                    .downcast_ref::<ReturnStatement>()
+                    .expect("stmt not ReturnStatement");
+                assert_eq!(
+                    return_stmt.token_literal(),
+                    "return",
+                    "returnStmt.TokenLiteral not 'return', got {:?}",
+                    return_stmt.token_literal()
+                );
+            }
         }
     }
 

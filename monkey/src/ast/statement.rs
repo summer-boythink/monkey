@@ -7,3 +7,9 @@ pub struct LetStatement {
     pub name: Option<Identifier>,
     pub value: Option<Box<dyn Expression>>,
 }
+
+#[derive(DefaultStatementNode)]
+pub struct ReturnStatement {
+    pub token: Token,
+    pub return_value: Option<Box<dyn Expression>>,
+}
