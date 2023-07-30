@@ -4,6 +4,7 @@ pub struct Parser {
     pub lexer: *mut Lexer,
     pub cur_token: Option<Token>,
     pub peek_token: Option<Token>,
+    errors: Vec<String>,
 }
 
 impl Parser {
@@ -12,10 +13,15 @@ impl Parser {
             lexer: l,
             cur_token: None,
             peek_token: None,
+            errors: Vec::new(),
         };
         p.next_token();
         p.next_token();
         return p;
+    }
+
+    pub fn errors(&self) -> &[String] {
+        &self.errors
     }
 
     pub fn next_token(&mut self) {
@@ -106,11 +112,21 @@ impl Parser {
         }
     }
 
+    fn peek_error(&mut self, t: TokenType) {
+        let msg = format!(
+            "expected next token to be {:?}, got {:?} instead",
+            t,
+            self.peek_token.clone().unwrap().r#type
+        );
+        self.errors.push(msg);
+    }
+
     fn expect_peek(&mut self, t: TokenType) -> bool {
         if self.peek_token_is(t) {
             self.next_token();
             true
         } else {
+            self.peek_error(t);
             false
         }
     }

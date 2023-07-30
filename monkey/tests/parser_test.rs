@@ -14,6 +14,8 @@ mod tests {
         let mut p = Parser::new(&mut l);
 
         let program = p.parse_program();
+        check_parser_error(p);
+
         if let Some(prog) = program {
             let statelen = prog.statements.len();
             if statelen != 3 {
@@ -28,6 +30,18 @@ mod tests {
         } else {
             panic!("parse_program None");
         }
+    }
+
+    fn check_parser_error(p: Parser) {
+        let errors = p.errors();
+
+        if errors.is_empty() {
+            return;
+        }
+        for msg in errors {
+            panic!("parser error: {:?}", msg);
+        }
+        panic!("parser has {} errors", errors.len());
     }
 
     fn test_let_statement<S>(s: &Box<S>, name: String) -> bool
