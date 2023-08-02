@@ -21,6 +21,11 @@ pub fn expression_node(input: TokenStream) -> TokenStream {
             }
         }
 
+        impl std::fmt::Display for #id {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(f, "{}", self.value)
+            }
+        }
 
     impl Expression for #id {
         fn expression_node(&self) {
