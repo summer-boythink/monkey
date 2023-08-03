@@ -1,12 +1,31 @@
+use std::collections::HashMap;
+
 use crate::{
-    Identifier, LetStatement, Lexer, Program, ReturnStatement, Statement, Token, TokenType,
+    Expression, ExpressionStatement, Identifier, LetStatement, Lexer, Program, ReturnStatement,
+    Statement, Token, TokenType,
 };
+
+type PrefixParseFn = fn(&mut Parser) -> Box<dyn Expression>;
+type InfixParseFn = fn(&mut Parser, dyn Expression) -> Box<dyn Expression>;
+
+#[derive(PartialOrd, PartialEq)]
+pub enum Precedence {
+    Lowest,
+    Equals,      // ==
+    LessGreater, // > or <
+    Sum,         // +
+    Product,     // *
+    Prefix,      // -X or !X
+    Call,        // myFunction(X)
+}
 
 pub struct Parser {
     pub lexer: *mut Lexer,
     pub cur_token: Option<Token>,
     pub peek_token: Option<Token>,
     errors: Vec<String>,
+    pub prefix_parse_fns: HashMap<TokenType, PrefixParseFn>,
+    pub infix_parse_fns: HashMap<TokenType, InfixParseFn>,
 }
 
 impl Parser {
@@ -16,10 +35,28 @@ impl Parser {
             cur_token: None,
             peek_token: None,
             errors: Vec::new(),
+            prefix_parse_fns: HashMap::new(),
+            infix_parse_fns: HashMap::new(),
         };
+        p.register_prefix(TokenType::IDENT, Parser::parse_identifier);
         p.next_token();
         p.next_token();
-        return p;
+        p
+    }
+
+    fn parse_identifier(&mut self) -> Box<dyn Expression> {
+        Box::new(Identifier {
+            token: self.cur_token.clone().unwrap(),
+            value: self.cur_token.clone().unwrap().literal,
+        })
+    }
+
+    fn register_prefix(&mut self, token_type: TokenType, f: PrefixParseFn) {
+        self.prefix_parse_fns.insert(token_type, f);
+    }
+
+    fn register_infix(&mut self, token_type: TokenType, f: InfixParseFn) {
+        self.infix_parse_fns.insert(token_type, f);
     }
 
     pub fn errors(&self) -> &[String] {
@@ -68,7 +105,33 @@ impl Parser {
             Some(TokenType::RETURN) => self
                 .parse_return_statement()
                 .map(|stmt| Box::new(stmt) as Box<dyn Statement>),
-            _ => None,
+            _ => self
+                .parser_expression_statement()
+                .map(|stmt| Box::new(stmt) as Box<dyn Statement>),
+        }
+    }
+
+    fn parser_expression_statement(&mut self) -> Option<ExpressionStatement> {
+        let stmt = ExpressionStatement {
+            token: self.cur_token.clone().unwrap(),
+            expression: self.parse_expression(Precedence::Lowest),
+        };
+        if self.peek_token_is(TokenType::SEMICOLON) {
+            self.next_token()
+        }
+        Some(stmt)
+    }
+
+    fn parse_expression(&mut self, _precedence: Precedence) -> Option<Box<dyn Expression>> {
+        let prefix = self
+            .prefix_parse_fns
+            .get(&self.cur_token.clone().unwrap().r#type);
+        match prefix {
+            Some(prefix) => {
+                let m = prefix(self);
+                Some(m)
+            }
+            None => None,
         }
     }
 

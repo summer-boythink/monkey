@@ -41,7 +41,7 @@ impl fmt::Display for Program {
     }
 }
 
-#[derive(DefaultExpressionNode, Debug)]
+#[derive(DefaultExpressionNode, Debug, Clone)]
 pub struct Identifier {
     pub token: Token,
     pub value: String,

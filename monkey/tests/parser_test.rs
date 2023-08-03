@@ -1,7 +1,10 @@
 #[cfg(test)]
 mod tests {
 
-    use monkey::{parser::parser::Parser, LetStatement, Lexer, Node, ReturnStatement, Statement};
+    use monkey::{
+        parser::parser::Parser, ExpressionStatement, Identifier, LetStatement, Lexer, Node,
+        ReturnStatement, Statement,
+    };
 
     #[test]
     fn test_let_statements() {
@@ -64,6 +67,43 @@ mod tests {
                     "returnStmt.TokenLiteral not 'return', got {:?}",
                     return_stmt.token_literal()
                 );
+            }
+        }
+    }
+
+    #[test]
+    fn test_indent_expression() {
+        let input = "foobar;".to_string();
+
+        let mut l = Lexer::new(input);
+        let mut p = Parser::new(&mut l);
+
+        let program = p.parse_program();
+        check_parser_error(p);
+
+        if let Some(prog) = program {
+            assert_eq!(
+                prog.statements.len(),
+                1,
+                "prog.Statements does not contain 1 statements. got={}",
+                prog.statements.len()
+            );
+            for stmt in &prog.statements {
+                let ident_stmt = stmt
+                    .as_any()
+                    .downcast_ref::<ExpressionStatement>()
+                    .expect("stmt not ExpressionStatement");
+
+                let ident = ident_stmt
+                    .expression
+                    .as_ref()
+                    .unwrap()
+                    .as_any()
+                    .downcast_ref::<Identifier>()
+                    .expect("ident_stmt not Identifier");
+
+                assert_eq!(ident.token_literal(), "foobar");
+                assert_eq!(ident.value, "foobar");
             }
         }
     }
