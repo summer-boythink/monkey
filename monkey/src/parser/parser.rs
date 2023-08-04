@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-    Expression, ExpressionStatement, Identifier, LetStatement, Lexer, Program, ReturnStatement,
-    Statement, Token, TokenType,
+    Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, Lexer, Program,
+    ReturnStatement, Statement, Token, TokenType,
 };
 
 type PrefixParseFn = fn(&mut Parser) -> Box<dyn Expression>;
@@ -39,6 +39,7 @@ impl Parser {
             infix_parse_fns: HashMap::new(),
         };
         p.register_prefix(TokenType::IDENT, Parser::parse_identifier);
+        p.register_prefix(TokenType::INT, Parser::parse_integer_literal);
         p.next_token();
         p.next_token();
         p
@@ -132,6 +133,27 @@ impl Parser {
                 Some(m)
             }
             None => None,
+        }
+    }
+
+    fn parse_integer_literal(&mut self) -> Box<dyn Expression> {
+        let mut lit = IntegerLiteral {
+            token: self.cur_token.clone().unwrap(),
+            value: 0,
+        };
+
+        match i64::from_str_radix(&self.cur_token.clone().unwrap().literal, 10) {
+            Ok(value) => {
+                lit.value = value;
+                Box::new(lit.clone())
+            }
+            Err(_) => {
+                eprintln!(
+                    "could not parse {} as integer",
+                    self.cur_token.clone().unwrap().literal
+                );
+                Box::new(lit.clone())
+            }
         }
     }
 

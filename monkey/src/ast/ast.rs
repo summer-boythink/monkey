@@ -46,3 +46,9 @@ pub struct Identifier {
     pub token: Token,
     pub value: String,
 }
+
+#[derive(DefaultExpressionNode, Debug, Clone)]
+pub struct IntegerLiteral {
+    pub token: Token,
+    pub value: i64,
+}

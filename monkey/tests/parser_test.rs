@@ -2,8 +2,8 @@
 mod tests {
 
     use monkey::{
-        parser::parser::Parser, ExpressionStatement, Identifier, LetStatement, Lexer, Node,
-        ReturnStatement, Statement,
+        parser::parser::Parser, ExpressionStatement, Identifier, IntegerLiteral, LetStatement,
+        Lexer, Node, ReturnStatement, Statement,
     };
 
     #[test]
@@ -104,6 +104,41 @@ mod tests {
 
                 assert_eq!(ident.token_literal(), "foobar");
                 assert_eq!(ident.value, "foobar");
+            }
+        }
+    }
+
+    #[test]
+    fn test_integet_expression() {
+        let input = "5;".to_string();
+
+        let mut l = Lexer::new(input);
+        let mut p = Parser::new(&mut l);
+
+        let program = p.parse_program();
+        check_parser_error(p);
+
+        if let Some(prog) = program {
+            assert_eq!(
+                prog.statements.len(),
+                1,
+                "prog.Statements does not contain 1 statements. got={}",
+                prog.statements.len()
+            );
+            for stmt in &prog.statements {
+                let int_stmt = stmt
+                    .as_any()
+                    .downcast_ref::<ExpressionStatement>()
+                    .unwrap()
+                    .expression
+                    .as_ref()
+                    .unwrap()
+                    .as_any()
+                    .downcast_ref::<IntegerLiteral>()
+                    .expect("int_stmt not IntegerLiteral");
+
+                assert_eq!(int_stmt.token_literal(), "5");
+                assert_eq!(int_stmt.value, 5);
             }
         }
     }
