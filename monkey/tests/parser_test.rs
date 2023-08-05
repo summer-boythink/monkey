@@ -2,8 +2,8 @@
 mod tests {
 
     use monkey::{
-        parser::parser::Parser, ExpressionStatement, Identifier, IntegerLiteral, LetStatement,
-        Lexer, Node, ReturnStatement, Statement,
+        parser::parser::Parser, Expression, ExpressionStatement, Identifier, IntegerLiteral,
+        LetStatement, Lexer, Node, PrefixExpression, ReturnStatement, Statement,
     };
 
     #[test]
@@ -141,6 +141,66 @@ mod tests {
                 assert_eq!(int_stmt.value, 5);
             }
         }
+    }
+
+    #[test]
+    fn test_prefix_expressions() {
+        let prefix_tests = vec![("!5;", "!", 5), ("-15;", "-", 15)];
+
+        for tt in prefix_tests {
+            let mut l = Lexer::new(tt.0.to_string());
+            let mut p = Parser::new(&mut l);
+
+            let program = p.parse_program();
+            check_parser_error(p);
+
+            if let Some(prog) = program {
+                assert_eq!(
+                    prog.statements.len(),
+                    1,
+                    "prog.Statements does not contain 1 statements. got={}",
+                    prog.statements.len()
+                );
+                for stmt in &prog.statements {
+                    let prefix_stmt = stmt
+                        .as_any()
+                        .downcast_ref::<ExpressionStatement>()
+                        .unwrap()
+                        .expression
+                        .as_ref()
+                        .unwrap()
+                        .as_any()
+                        .downcast_ref::<PrefixExpression>()
+                        .expect("prefix_stmt not PrefixExpression");
+
+                    assert_eq!(prefix_stmt.operator, tt.1);
+                    test_indent_literal(
+                        prefix_stmt.right.as_ref().map(|x| x.as_ref()).unwrap(),
+                        tt.2,
+                    );
+                }
+            }
+        }
+    }
+
+    fn test_indent_literal(il: &dyn Expression, value: i64) {
+        let integ = il
+            .as_any()
+            .downcast_ref::<IntegerLiteral>()
+            .expect("il not *ast.IntegerLiteral");
+
+        assert_eq!(
+            integ.value, value,
+            "integ.Value not {}. got={}",
+            value, integ.value
+        );
+        assert_eq!(
+            integ.token_literal(),
+            value.to_string(),
+            "integ.TokenLiteral not {}. got={}",
+            value,
+            integ.token_literal()
+        );
     }
 
     fn check_parser_error(p: Parser) {

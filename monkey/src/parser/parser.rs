@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 use crate::{
-    Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, Lexer, Program,
-    ReturnStatement, Statement, Token, TokenType,
+    Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, Lexer,
+    PrefixExpression, Program, ReturnStatement, Statement, Token, TokenType,
 };
 
-type PrefixParseFn = fn(&mut Parser) -> Box<dyn Expression>;
 type InfixParseFn = fn(&mut Parser, dyn Expression) -> Box<dyn Expression>;
+type PrefixParseFn = fn(&mut Parser) -> Box<dyn Expression>;
 
 #[derive(PartialOrd, PartialEq)]
 pub enum Precedence {
@@ -40,6 +40,8 @@ impl Parser {
         };
         p.register_prefix(TokenType::IDENT, Parser::parse_identifier);
         p.register_prefix(TokenType::INT, Parser::parse_integer_literal);
+        p.register_prefix(TokenType::BANG, Parser::parse_prefix_expression);
+        p.register_prefix(TokenType::MINUS, Parser::parse_prefix_expression);
         p.next_token();
         p.next_token();
         p
@@ -62,6 +64,11 @@ impl Parser {
 
     pub fn errors(&self) -> &[String] {
         &self.errors
+    }
+
+    fn no_prefix_parse_fn_error(&mut self, t: TokenType) {
+        let msg = format!("no prefix parse function for {:?} found", t);
+        self.errors.push(msg);
     }
 
     pub fn next_token(&mut self) {
@@ -132,8 +139,25 @@ impl Parser {
                 let m = prefix(self);
                 Some(m)
             }
-            None => None,
+            None => {
+                self.no_prefix_parse_fn_error(self.cur_token.clone().unwrap().r#type);
+                None
+            }
         }
+    }
+
+    fn parse_prefix_expression(&mut self) -> Box<dyn Expression> {
+        let mut expression = PrefixExpression {
+            token: self.cur_token.clone().unwrap().clone(),
+            operator: self.cur_token.clone().unwrap().literal.clone(),
+            right: None,
+        };
+
+        self.next_token();
+
+        expression.right = self.parse_expression(Precedence::Prefix);
+
+        Box::new(expression)
     }
 
     fn parse_integer_literal(&mut self) -> Box<dyn Expression> {

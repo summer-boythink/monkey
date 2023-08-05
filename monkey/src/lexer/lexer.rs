@@ -99,6 +99,7 @@ impl Lexer {
         let tok: Token;
         self.skip_white_space();
         match self.ch {
+            Some('-') => tok = Token::new(TokenType::MINUS, self.ch.unwrap().to_string()),
             Some('<') => tok = Token::new(TokenType::LT, self.ch.unwrap().to_string()),
             Some('>') => tok = Token::new(TokenType::GT, self.ch.unwrap().to_string()),
             Some('*') => tok = Token::new(TokenType::ASTERISK, self.ch.unwrap().to_string()),
