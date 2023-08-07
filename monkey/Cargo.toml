@@ -23,3 +23,5 @@ path = "src/lib.rs"
 [dependencies]
 colored = "2.0.0"
 monkey-macros = {path = "../monkey-macros", version = "0.1.0"}
+lazy_static = "1.4.0"
+derive_more = "0.99.17"

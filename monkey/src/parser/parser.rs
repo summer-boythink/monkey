@@ -1,14 +1,15 @@
+use lazy_static::lazy_static;
 use std::collections::HashMap;
-
+// use derive_more::{Add, Sub, From};
 use crate::{
-    Expression, ExpressionStatement, Identifier, IntegerLiteral, LetStatement, Lexer,
-    PrefixExpression, Program, ReturnStatement, Statement, Token, TokenType,
+    Expression, ExpressionStatement, Identifier, InfixExpression, IntegerLiteral, LetStatement,
+    Lexer, PrefixExpression, Program, ReturnStatement, Statement, Token, TokenType,
 };
 
-type InfixParseFn = fn(&mut Parser, dyn Expression) -> Box<dyn Expression>;
+type InfixParseFn = fn(&mut Parser, Box<dyn Expression>) -> Box<dyn Expression>;
 type PrefixParseFn = fn(&mut Parser) -> Box<dyn Expression>;
 
-#[derive(PartialOrd, PartialEq)]
+#[derive(PartialOrd, PartialEq, Clone, Copy)]
 pub enum Precedence {
     Lowest,
     Equals,      // ==
@@ -17,6 +18,22 @@ pub enum Precedence {
     Product,     // *
     Prefix,      // -X or !X
     Call,        // myFunction(X)
+}
+
+lazy_static! {
+    static ref PRECEDENCES: HashMap<TokenType, Precedence> = {
+        let mut m = HashMap::new();
+        m.insert(TokenType::EQ, Precedence::Equals);
+        m.insert(TokenType::NotEq, Precedence::Equals);
+        m.insert(TokenType::LT, Precedence::LessGreater);
+        m.insert(TokenType::GT, Precedence::LessGreater);
+        m.insert(TokenType::PLUS, Precedence::Sum);
+        m.insert(TokenType::MINUS, Precedence::Sum);
+        m.insert(TokenType::SLASH, Precedence::Product);
+        m.insert(TokenType::ASTERISK, Precedence::Product);
+        m.insert(TokenType::LPAREN, Precedence::Call);
+        m
+    };
 }
 
 pub struct Parser {
@@ -160,6 +177,27 @@ impl Parser {
         Box::new(expression)
     }
 
+    fn parse_infix_expression(&mut self, left: Box<dyn Expression>) -> Box<dyn Expression> {
+        let mut expression = InfixExpression {
+            token: self.cur_token.clone().unwrap(),
+            operator: self.cur_token.clone().unwrap().literal.clone(),
+            left: Some(left),
+            right: None,
+        };
+
+        let precedence = self.cur_precedence();
+        self.next_token();
+
+        if expression.operator == "+" {
+            let p = (precedence as i8) - 1;
+            expression.right = self.parse_expression(unsafe { std::mem::transmute(p) });
+        } else {
+            expression.right = self.parse_expression(precedence);
+        }
+
+        Box::new(expression)
+    }
+
     fn parse_integer_literal(&mut self) -> Box<dyn Expression> {
         let mut lit = IntegerLiteral {
             token: self.cur_token.clone().unwrap(),
@@ -248,6 +286,18 @@ impl Parser {
             self.peek_token.clone().unwrap().r#type
         );
         self.errors.push(msg);
+    }
+
+    fn peek_precedence(&self) -> Precedence {
+        *PRECEDENCES
+            .get(&self.peek_token.clone().unwrap().r#type)
+            .unwrap_or(&Precedence::Lowest)
+    }
+
+    fn cur_precedence(&self) -> Precedence {
+        *PRECEDENCES
+            .get(&self.cur_token.clone().unwrap().r#type)
+            .unwrap_or(&Precedence::Lowest)
     }
 
     fn expect_peek(&mut self, t: TokenType) -> bool {

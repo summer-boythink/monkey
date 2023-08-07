@@ -77,3 +77,36 @@ impl std::fmt::Display for PrefixExpression {
         write!(f, "({}{})", self.operator, self.right.as_ref().unwrap())
     }
 }
+
+pub struct InfixExpression {
+    pub token: Token, // The operator token, e.g. +
+    pub left: Option<Box<dyn Expression>>,
+    pub operator: String,
+    pub right: Option<Box<dyn Expression>>,
+}
+
+impl Expression for InfixExpression {
+    fn expression_node(&self) {}
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+impl Node for InfixExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.to_string()
+    }
+}
+
+impl fmt::Display for InfixExpression {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "({} {} {})",
+            self.left.as_ref().unwrap(),
+            self.operator,
+            self.right.as_ref().unwrap()
+        )
+    }
+}
